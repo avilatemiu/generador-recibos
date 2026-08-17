@@ -7,10 +7,13 @@
 #include <QDoubleSpinBox>
 #include <QPushButton>
 #include <QMessageBox>
+#include <QSettings>
 #include "recibo.h"
 
 int main(int argc, char *argv[])
 {
+    QSettings settings("MiAplicacion","GeneradorRecibos");
+
     QApplication app(argc, argv);
 
     QWidget ventana;
@@ -31,7 +34,7 @@ int main(int argc, char *argv[])
     QLabel *conceptoLabel = new QLabel("Concepto: ");
     QLineEdit *conceptoEdit = new QLineEdit();
 
-    QLabel *importeLabel = new QLabel("Impoete: ");
+    QLabel *importeLabel = new QLabel("Importe: ");
     QDoubleSpinBox *importeEdit = new QDoubleSpinBox();
     importeEdit -> setMaximum(99999999.99);
     importeEdit -> setDecimals(2);
@@ -47,33 +50,45 @@ int main(int argc, char *argv[])
     layout->addRow(importeLabel, importeEdit);
     layout->addRow(generarButton);
 
+    int numeroRecibo = settings.value("ultimoNumero", 1).toInt();
+
     //Esto es una señal y el [&ventana]() un lambda de cpp
     QObject::connect(generarButton,
                      &QPushButton::clicked,
-                     &ventana, [&ventana, clienteEdit, cuitEdit,
+                     &ventana, [&ventana, &numeroRecibo, &settings, clienteEdit, cuitEdit,
                       fechaEdit, conceptoEdit, importeEdit]() {
 
                          Recibo recibo;
 
+                         recibo.setNumero(numeroRecibo);
                          recibo.setCliente(clienteEdit->text());
                          recibo.setCuit(cuitEdit->text());
                          recibo.setFecha(fechaEdit->date());
                          recibo.setConcepto(conceptoEdit->text());
                          recibo.setImporte(importeEdit->value());
 
+                         if (!recibo.reciboValido()){
+                             QMessageBox::warning(
+                                 &ventana,
+                                 "Datos inválidos",
+                                 "Completá todos los campos correctamente."
+                                 );
+                             return;
+                         }
+
                          QString mensaje = QString(
-                             "Cliente : %1\n"
-                             "CUIT: %2\n"
-                             "Fecha: %3\n"
-                             "Concepto: %4\n"
-                             "Importe: %5")
+                             "Recibo N.°%1\n"
+                             "Fecha: %2\n"
+                             "Recibí de %3 con CUIT %4 el monto de $ %6\n"
+                             "En concepto de %5")
+                                               .arg(recibo.getNumero(), 6, 10, QChar('0'))
                                                .arg(
+                                                   recibo.getFecha().toString("dd/MM/yyyy"),
                                                    recibo.getCliente(),
                                                    recibo.getCuit(),
-                                                   recibo.getFecha().toString("dd/MM/yyyy"),
                                                    recibo.getConcepto()
                                                    ).arg(
-                                                   recibo.getImporte(), 0, 'f', 2
+                                                   recibo.getImporte(),0,'f',2
                                                    );
 
                          QMessageBox::information(
@@ -81,6 +96,10 @@ int main(int argc, char *argv[])
                              "Datos del recibo",
                              mensaje
                              );
+
+                         numeroRecibo++;
+                         settings.setValue("ultimoNumero", numeroRecibo);
+
                         }
                      );
 

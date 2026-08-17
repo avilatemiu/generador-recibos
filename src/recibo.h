@@ -9,6 +9,9 @@ class Recibo
 public:
     Recibo();
 
+    int getNumero() const;
+    void setNumero(int numero);
+
     QString getCliente() const;
     void setCliente(const QString &cliente);
 
@@ -24,7 +27,10 @@ public:
     double getImporte() const;
     void setImporte(double importe);
 
+    bool reciboValido() const;
+
 private:
+    int numero;
     QString cliente;
     QString cuit;
     QDate fecha;

@@ -1,8 +1,28 @@
 #include "recibo.h"
 
 Recibo::Recibo()
-    : importe(0.0)
+    : numero(0),
+    importe(0.0)
 {
+}
+
+int Recibo::getNumero() const
+{
+    return numero;
+}
+
+void Recibo::setNumero(int numero)
+{
+    this->numero = numero;
+}
+
+bool Recibo::reciboValido() const
+{
+    return !cliente.trimmed().isEmpty()
+           && !cuit.trimmed().isEmpty()
+           && !concepto.trimmed().isEmpty()
+           && !concepto.trimmed().isEmpty()
+           && importe > 0;
 }
 
 QString Recibo::getCliente() const
