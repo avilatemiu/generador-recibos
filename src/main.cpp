@@ -9,12 +9,15 @@
 #include <QMessageBox>
 #include <QSettings>
 #include "recibo.h"
+#include "database.h"
 
 int main(int argc, char *argv[])
 {
     QSettings settings("MiAplicacion","GeneradorRecibos");
 
     QApplication app(argc, argv);
+
+    Database database;
 
     QWidget ventana;
     ventana.resize(800, 600);
@@ -55,7 +58,7 @@ int main(int argc, char *argv[])
     //Esto es una señal y el [&ventana]() un lambda de cpp
     QObject::connect(generarButton,
                      &QPushButton::clicked,
-                     &ventana, [&ventana, &numeroRecibo, &settings, clienteEdit, cuitEdit,
+                     &ventana, [&ventana, &numeroRecibo, &settings, &database, clienteEdit, cuitEdit,
                       fechaEdit, conceptoEdit, importeEdit]() {
 
                          Recibo recibo;
@@ -73,6 +76,14 @@ int main(int argc, char *argv[])
                                  "Datos inválidos",
                                  "Completá todos los campos correctamente."
                                  );
+                             return;
+                         }
+
+                         if (!database.guardarCliente(recibo.getCliente(), recibo.getCuit())){
+                             QMessageBox::warning(
+                                 &ventana,
+                                 "Error",
+                                 "No se pudo guardar el cliente en la base de datos.");
                              return;
                          }
 
