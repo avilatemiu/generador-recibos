@@ -21,7 +21,6 @@ bool Recibo::reciboValido() const
     return !cliente.trimmed().isEmpty()
            && !cuit.trimmed().isEmpty()
            && !concepto.trimmed().isEmpty()
-           && !concepto.trimmed().isEmpty()
            && importe > 0;
 }
 

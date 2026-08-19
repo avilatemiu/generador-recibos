@@ -8,8 +8,10 @@
 #include <QPushButton>
 #include <QMessageBox>
 #include <QSettings>
+#include <QFileDialog>
 #include "recibo.h"
 #include "database.h"
+#include "pdfgenerator.h"
 
 int main(int argc, char *argv[])
 {
@@ -102,10 +104,36 @@ int main(int argc, char *argv[])
                                                    recibo.getImporte(),0,'f',2
                                                    );
 
+                         QString ruta = QFileDialog::getSaveFileName(
+                             &ventana,
+                             "Guardar recibo",
+                             QString("recibo_%1.pdf")
+                                 .arg(recibo.getNumero(), 6, 10, QChar('0')),
+                             "Archivos PDF (*.pdf)"
+                             );
+
+                         if (ruta.isEmpty()) {
+                             return;
+                         }
+
+                         if (!ruta.endsWith(".pdf", Qt::CaseInsensitive)) {
+                             ruta += ".pdf";
+                         }
+
+                         if (!PdfGenerator::generar(recibo, ruta)) {
+                             QMessageBox::critical(
+                                 &ventana,
+                                 "Error",
+                                 "No se pudo generar el PDF."
+                                 );
+                             return;
+                         }
+
                          QMessageBox::information(
                              &ventana,
-                             "Datos del recibo",
-                             mensaje
+                             "Recibo generado",
+                             QString("El recibo fue generado correctamente en:\n%1")
+                                 .arg(ruta)
                              );
 
                          numeroRecibo++;
