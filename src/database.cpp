@@ -4,6 +4,9 @@
 #include <QSqlQuery>
 #include <QSqlError>
 #include <QDebug>
+#include <QStandardPaths>
+#include <QDir>
+#include <QCoreApplication>
 
 Database::Database()
 {
@@ -12,13 +15,48 @@ Database::Database()
 
 bool Database::conectar()
 {
+    QString directorioEjecutable =
+        QCoreApplication::applicationDirPath();
+
+    QDir directorio(directorioEjecutable);
+
+    if (!directorio.cdUp()) {
+        qDebug() << "Error al acceder al directorio del proyecto";
+        return false;
+    }
+
+    QString ruta = directorio.filePath("clientes.db");
+
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
 
-    db.setDatabaseName("clientes.db");
+    db.setDatabaseName(ruta);
 
     if (!db.open()) {
         qDebug() << "Error al abrir la base de datos:"
                  << db.lastError().text();
+        return false;
+    }
+
+    qDebug() << "Base de datos:" << ruta;
+
+    return true;
+}
+
+bool Database::crearTablas()
+{
+    QSqlQuery query;
+
+    query.prepare(
+        "CREATE TABLE IF NOT EXISTS clientes ("
+        "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+        "nombre TEXT NOT NULL, "
+        "cuit TEXT NOT NULL UNIQUE"
+        ")"
+        );
+
+    if (!query.exec()) {
+        qDebug() << "Error al crear tabla clientes:"
+                 << query.lastError().text();
         return false;
     }
 
@@ -27,38 +65,52 @@ bool Database::conectar()
 
 bool Database::guardarCliente(const QString &nombre, const QString &cuit)
 {
-    QSqlQuery query;
+    // Buscar si el CUIT ya existe
+    QSqlQuery buscar;
 
-    // Primero buscamos si el CUIT ya existe
-    query.prepare(
-        "SELECT id FROM clientes "
-        "WHERE cuit = :cuit"
-        );
+    if (!buscar.prepare(
+            "SELECT id FROM clientes "
+            "WHERE cuit = :cuit"
+            )) {
 
-    query.bindValue(":cuit", cuit);
+        qDebug() << "Error en prepare:"
+                 << buscar.lastError().text();
 
-    if (!query.exec()) {
-        qDebug() << "Error al buscar cliente:"
-                 << query.lastError().text();
         return false;
     }
 
-    // Si el CUIT ya existe, actualizamos el nombre
-    if (query.next()) {
-        int id = query.value(0).toInt();
+    buscar.bindValue(":cuit", cuit);
 
-        query.prepare(
+    buscar.addBindValue(cuit);
+
+    qDebug() << "SQL:" << buscar.lastQuery();
+    qDebug() << "Bound values:" << buscar.boundValues();
+    qDebug() << "Cuit:" << cuit;
+
+    if (!buscar.exec()) {
+        qDebug() << "Error al buscar cliente:"
+                 << buscar.lastError().text();
+        return false;
+    }
+
+    // Si existe, actualizar
+    if (buscar.next()) {
+        int id = buscar.value(0).toInt();
+
+        QSqlQuery actualizar;
+
+        actualizar.prepare(
             "UPDATE clientes "
             "SET nombre = :nombre "
             "WHERE id = :id"
             );
 
-        query.bindValue(":nombre", nombre);
-        query.bindValue(":id", id);
+        actualizar.bindValue(":nombre", nombre);
+        actualizar.bindValue(":id", id);
 
-        if (!query.exec()) {
+        if (!actualizar.exec()) {
             qDebug() << "Error al actualizar cliente:"
-                     << query.lastError().text();
+                     << actualizar.lastError().text();
             return false;
         }
 
@@ -67,18 +119,20 @@ bool Database::guardarCliente(const QString &nombre, const QString &cuit)
         return true;
     }
 
-    // Si el CUIT no existe, creamos el cliente
-    query.prepare(
+    // Si no existe, insertar
+    QSqlQuery insertar;
+
+    insertar.prepare(
         "INSERT INTO clientes (nombre, cuit) "
         "VALUES (:nombre, :cuit)"
         );
 
-    query.bindValue(":nombre", nombre);
-    query.bindValue(":cuit", cuit);
+    insertar.bindValue(":nombre", nombre);
+    insertar.bindValue(":cuit", cuit);
 
-    if (!query.exec()) {
+    if (!insertar.exec()) {
         qDebug() << "Error al guardar cliente:"
-                 << query.lastError().text();
+                 << insertar.lastError().text();
         return false;
     }
 

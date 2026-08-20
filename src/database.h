@@ -12,6 +12,7 @@ public:
 
 private:
     bool conectar();
+    bool crearTablas();
 };
 
 #endif
