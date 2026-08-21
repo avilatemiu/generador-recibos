@@ -18,6 +18,10 @@ VentanaPrincipal::VentanaPrincipal(QWidget *parent)
 
     connect(generarButton, &QPushButton::clicked,
             this, &VentanaPrincipal::onGenerarReciboClicked);
+
+    // connect(verPeriodo, &QPushButton::clicked, [](){
+    //     qDebug() << "Botón presionado!";
+    // });
 }
 
 void VentanaPrincipal::setupUi()
@@ -48,6 +52,9 @@ void VentanaPrincipal::setupUi()
     layout->addRow("Concepto:", conceptoEdit);
     layout->addRow("Importe:", importeEdit);
     layout->addRow(generarButton);
+
+    // verPeriodo = new QPushButton("Ver períodos", this);
+    // verPeriodo -> move (100,100);
 
     setLayout(layout);
 }

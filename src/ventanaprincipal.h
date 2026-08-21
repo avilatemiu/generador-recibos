@@ -28,6 +28,7 @@ private:
     QLineEdit *conceptoEdit;
     QDoubleSpinBox *importeEdit;
     QPushButton *generarButton;
+    // QPushButton *verPeriodo;
 
     Database database;
     QSettings settings;
