@@ -34,16 +34,16 @@ bool PdfGenerator::generar(const Recibo &recibo, const QString &ruta)
                                   .arg(recibo.getFecha().toString("dd/MM/yyyy")));
     y += 150;
 
-    painter.drawText(1000, y, QString("Cliente: %1")
-                                  .arg(recibo.getCliente()));
+    painter.drawText(1000, y, QString("Recibí de %1 el monto de $%2")
+                                  .arg(recibo.getCliente(),
+                                        QString::number(recibo.getImporte(), 'f', 2)));
+
     y += 150;
 
-    painter.drawText(1000, y, QString("Concepto: %1")
+    painter.drawText(1000, y, QString("En concepto de %1")
                                   .arg(recibo.getConcepto()));
     y += 150;
 
-    painter.drawText(1000, y, QString("Importe: $%1")
-                                  .arg(QString::number(recibo.getImporte(), 'f', 2)));
 
     painter.end();
 
