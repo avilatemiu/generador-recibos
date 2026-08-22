@@ -2,6 +2,7 @@
 #include "recibo.h"
 #include "pdfgenerator.h"
 
+#include <QStackedWidget>
 #include <QLabel>
 #include <QFormLayout>
 #include <QMessageBox>
@@ -16,47 +17,81 @@ VentanaPrincipal::VentanaPrincipal(QWidget *parent)
 
     numeroRecibo = settings.value("ultimoNumero", 1).toInt();
 
+    connect(irAFormularioButton, &QPushButton::clicked, [this](){
+             stackedWidget -> setCurrentIndex(1);
+    });
+
+    connect(volverMenuButton, &QPushButton::clicked, [this]() {
+        stackedWidget->setCurrentIndex(0);
+    });
+
     connect(generarButton, &QPushButton::clicked,
             this, &VentanaPrincipal::onGenerarReciboClicked);
 
-    // connect(verPeriodo, &QPushButton::clicked, [](){
-    //     qDebug() << "Botón presionado!";
-    // });
 }
-
 void VentanaPrincipal::setupUi()
 {
     resize(800, 600);
     setWindowTitle("Generador de Recibos");
 
-    clienteEdit = new QLineEdit(this);
-    cuitEdit = new QLineEdit(this);
+    stackedWidget = new QStackedWidget(this);
 
-    fechaEdit = new QDateEdit(this);
+    //Menu
+
+    menuPage = new QWidget();
+    QVBoxLayout *menuLayout = new QVBoxLayout(menuPage);
+
+    irAFormularioButton = new QPushButton("Generar nuevo recibo", menuPage);
+    irAFormularioButton->setFixedHeight(40);
+
+    menuLayout->addStretch();
+    menuLayout->addWidget(irAFormularioButton);
+    menuLayout->addStretch();
+    //menuPage->setLayout(menuLayout);
+
+    //Formulario
+    formularioPage = new QWidget();
+
+    clienteEdit = new QLineEdit(formularioPage);
+    cuitEdit = new QLineEdit(formularioPage);
+
+    fechaEdit = new QDateEdit(formularioPage);
     fechaEdit->setCalendarPopup(true);
     fechaEdit->setDate(QDate::currentDate());
 
-    conceptoEdit = new QLineEdit(this);
+    conceptoEdit = new QLineEdit(formularioPage);
 
-    importeEdit = new QDoubleSpinBox(this);
+    importeEdit = new QDoubleSpinBox(formularioPage);
     importeEdit->setMaximum(99999999.99);
     importeEdit->setDecimals(2);
     importeEdit->setPrefix("$ ");
 
-    generarButton = new QPushButton("Generar recibo", this);
+    generarButton = new QPushButton("Generar recibo", formularioPage);
+    volverMenuButton = new QPushButton("Volver al menú", formularioPage);
 
-    QFormLayout *layout = new QFormLayout(this);
-    layout->addRow("Cliente:", clienteEdit);
-    layout->addRow("CUIT:", cuitEdit);
-    layout->addRow("Fecha:", fechaEdit);
-    layout->addRow("Concepto:", conceptoEdit);
-    layout->addRow("Importe:", importeEdit);
-    layout->addRow(generarButton);
+    QFormLayout *formLayout = new QFormLayout(formularioPage);
+    formLayout->addRow("Cliente:", clienteEdit);
+    formLayout->addRow("CUIT:", cuitEdit);
+    formLayout->addRow("Fecha:", fechaEdit);
+    formLayout->addRow("Concepto:", conceptoEdit);
+    formLayout->addRow("Importe:", importeEdit);
+    formLayout->addRow(generarButton);
+    formLayout->addRow(volverMenuButton);
 
     // verPeriodo = new QPushButton("Ver períodos", this);
     // verPeriodo -> move (100,100);
 
-    setLayout(layout);
+    //Páginas del stacked widget
+
+    stackedWidget->addWidget(menuPage);
+    stackedWidget->addWidget(formularioPage);
+
+    stackedWidget->setCurrentIndex(0);
+
+    QVBoxLayout *mainLayout = new QVBoxLayout();
+    mainLayout->addWidget(stackedWidget);
+
+    setLayout(mainLayout);
 }
 
 void VentanaPrincipal::onGenerarReciboClicked()

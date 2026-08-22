@@ -2,6 +2,7 @@
 #define VENTANAPRINCIPAL_H
 
 #include <QWidget>
+#include <QStackedWidget>
 #include <QLineEdit>
 #include <QDateEdit>
 #include <QDoubleSpinBox>
@@ -20,14 +21,25 @@ private slots:
     void onGenerarReciboClicked();
 
 private:
+
     void setupUi();
 
+    //Contenedor de pantallas
+    QStackedWidget *stackedWidget;
+
+    //Componente del menú
+    QWidget *menuPage;
+    QPushButton *irAFormularioButton;
+
+    //Componente del formulario
+    QWidget *formularioPage;
     QLineEdit *clienteEdit;
     QLineEdit *cuitEdit;
     QDateEdit *fechaEdit;
     QLineEdit *conceptoEdit;
     QDoubleSpinBox *importeEdit;
     QPushButton *generarButton;
+    QPushButton *volverMenuButton;
     // QPushButton *verPeriodo;
 
     Database database;

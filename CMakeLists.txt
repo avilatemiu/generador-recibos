@@ -19,6 +19,8 @@ qt_add_executable(GeneradorRecibos
     src/pdfgenerator.cpp
     src/ventanaprincipal.h
     src/ventanaprincipal.cpp
+
+
 )
 
 target_link_libraries(GeneradorRecibos PRIVATE Qt6::Widgets Qt6::Sql)
