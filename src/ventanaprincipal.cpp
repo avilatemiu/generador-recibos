@@ -17,16 +17,20 @@ VentanaPrincipal::VentanaPrincipal(QWidget *parent)
 
     numeroRecibo = settings.value("ultimoNumero", 1).toInt();
 
-    connect(irAFormularioButton, &QPushButton::clicked, [this](){
+    connect(irAFormularioButton, &QPushButton::clicked, this, [this](){
              stackedWidget -> setCurrentIndex(1);
     });
 
-    connect(volverMenuButton, &QPushButton::clicked, [this]() {
+    connect(volverMenuButton, &QPushButton::clicked, this, [this]() {
         stackedWidget->setCurrentIndex(0);
     });
 
     connect(generarButton, &QPushButton::clicked,
             this, &VentanaPrincipal::onGenerarReciboClicked);
+
+    connect(configButton, &QPushButton::clicked, this, [this](){
+        abrirConfiguracion();
+    });
 
 }
 void VentanaPrincipal::setupUi()
@@ -35,6 +39,16 @@ void VentanaPrincipal::setupUi()
     setWindowTitle("Generador de Recibos");
 
     stackedWidget = new QStackedWidget(this);
+
+    //Barra de tareas
+
+    QHBoxLayout *topBarLayout = new QHBoxLayout();
+
+    configButton = new QPushButton("Configuración");
+    configButton -> setFixedWidth(120);
+
+    topBarLayout->addWidget(configButton);
+    topBarLayout->addStretch();
 
     //Menu
 
@@ -89,6 +103,7 @@ void VentanaPrincipal::setupUi()
     stackedWidget->setCurrentIndex(0);
 
     QVBoxLayout *mainLayout = new QVBoxLayout();
+    mainLayout->addLayout(topBarLayout);
     mainLayout->addWidget(stackedWidget);
 
     setLayout(mainLayout);
@@ -144,4 +159,20 @@ void VentanaPrincipal::onGenerarReciboClicked()
 
     numeroRecibo++;
     settings.setValue("ultimoNumero", numeroRecibo);
+}
+
+void VentanaPrincipal::abrirConfiguracion()
+{
+    QDialog dialog(this);
+    dialog.setWindowTitle("Configuración");
+    dialog.resize(300,200);
+
+    QVBoxLayout *layout = new QVBoxLayout(&dialog);
+    layout->addWidget(new QLabel("Opciones de configuaricón del sistema...", &dialog));
+
+    QPushButton *cerrarBtn = new QPushButton("Aceptar", &dialog);
+    connect(cerrarBtn, &QPushButton::clicked, &dialog, &QDialog::accept);
+    layout->addWidget(cerrarBtn);
+
+    dialog.exec();
 }

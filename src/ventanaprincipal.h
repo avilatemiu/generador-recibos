@@ -40,6 +40,10 @@ private:
     QDoubleSpinBox *importeEdit;
     QPushButton *generarButton;
     QPushButton *volverMenuButton;
+    QPushButton *configButton;
+
+    void abrirConfiguracion();
+
     // QPushButton *verPeriodo;
 
     Database database;
