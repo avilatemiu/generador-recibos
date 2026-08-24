@@ -19,6 +19,7 @@ public:
 
 private slots:
     void onGenerarReciboClicked();
+    void configurarBotonVolver(QPushButton *boton);
 
 private:
 
@@ -30,6 +31,7 @@ private:
     //Componente del menú
     QWidget *menuPage;
     QPushButton *irAFormularioButton;
+    QPushButton *registroPagosButton;
 
     //Componente del formulario
     QWidget *formularioPage;
@@ -39,12 +41,14 @@ private:
     QLineEdit *conceptoEdit;
     QDoubleSpinBox *importeEdit;
     QPushButton *generarButton;
-    QPushButton *volverMenuButton;
+
+    //Configutación
     QPushButton *configButton;
 
     void abrirConfiguracion();
 
-    // QPushButton *verPeriodo;
+    //Ver Informe
+    QWidget *informePage;
 
     Database database;
     QSettings settings;

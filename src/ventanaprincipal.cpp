@@ -21,15 +21,16 @@ VentanaPrincipal::VentanaPrincipal(QWidget *parent)
              stackedWidget -> setCurrentIndex(1);
     });
 
-    connect(volverMenuButton, &QPushButton::clicked, this, [this]() {
-        stackedWidget->setCurrentIndex(0);
-    });
 
     connect(generarButton, &QPushButton::clicked,
             this, &VentanaPrincipal::onGenerarReciboClicked);
 
     connect(configButton, &QPushButton::clicked, this, [this](){
         abrirConfiguracion();
+    });
+
+    connect(registroPagosButton,&QPushButton::clicked, this, [this](){
+        stackedWidget->setCurrentIndex(2);
     });
 
 }
@@ -56,14 +57,19 @@ void VentanaPrincipal::setupUi()
     QVBoxLayout *menuLayout = new QVBoxLayout(menuPage);
 
     irAFormularioButton = new QPushButton("Generar nuevo recibo", menuPage);
-    irAFormularioButton->setFixedHeight(40);
+    irAFormularioButton -> setFixedHeight(40);
+
+    registroPagosButton = new QPushButton("Ver Informe de Pagos", menuPage);
+    registroPagosButton -> setFixedHeight(40);
 
     menuLayout->addStretch();
     menuLayout->addWidget(irAFormularioButton);
+    menuLayout->addWidget(registroPagosButton);
     menuLayout->addStretch();
-    //menuPage->setLayout(menuLayout);
+    // menuPage->setLayout(menuLayout);
 
     //Formulario
+
     formularioPage = new QWidget();
 
     clienteEdit = new QLineEdit(formularioPage);
@@ -81,7 +87,9 @@ void VentanaPrincipal::setupUi()
     importeEdit->setPrefix("$ ");
 
     generarButton = new QPushButton("Generar recibo", formularioPage);
-    volverMenuButton = new QPushButton("Volver al menú", formularioPage);
+    QPushButton *volverDesdeForm = new QPushButton("Volver al menú", formularioPage);
+    configurarBotonVolver(volverDesdeForm);
+
 
     QFormLayout *formLayout = new QFormLayout(formularioPage);
     formLayout->addRow("Cliente:", clienteEdit);
@@ -90,7 +98,20 @@ void VentanaPrincipal::setupUi()
     formLayout->addRow("Concepto:", conceptoEdit);
     formLayout->addRow("Importe:", importeEdit);
     formLayout->addRow(generarButton);
-    formLayout->addRow(volverMenuButton);
+    formLayout->addRow(volverDesdeForm);
+
+    //Informe de Pagos
+
+    informePage = new QWidget();
+    QVBoxLayout *informeLayout = new QVBoxLayout(informePage);
+
+    QPushButton *volverDesdeInforme = new QPushButton("Volver al menú", informePage);
+    configurarBotonVolver(volverDesdeInforme);
+
+    informeLayout -> addStretch();
+    informeLayout -> addWidget(volverDesdeInforme);
+    informeLayout -> addStretch();
+
 
     // verPeriodo = new QPushButton("Ver períodos", this);
     // verPeriodo -> move (100,100);
@@ -99,6 +120,7 @@ void VentanaPrincipal::setupUi()
 
     stackedWidget->addWidget(menuPage);
     stackedWidget->addWidget(formularioPage);
+    stackedWidget->addWidget(informePage);
 
     stackedWidget->setCurrentIndex(0);
 
@@ -107,6 +129,14 @@ void VentanaPrincipal::setupUi()
     mainLayout->addWidget(stackedWidget);
 
     setLayout(mainLayout);
+}
+
+void VentanaPrincipal::configurarBotonVolver(QPushButton *boton)
+{
+    // Conecta cualquier botón que le pases para que cambie al menú (índice 0)
+    connect(boton, &QPushButton::clicked, this, [this]() {
+        stackedWidget->setCurrentIndex(0);
+    });
 }
 
 void VentanaPrincipal::onGenerarReciboClicked()
