@@ -10,7 +10,10 @@
 
 Database::Database()
 {
-    conectar();
+    if(conectar()){
+        crearTablas();
+    }
+        ;
 }
 
 bool Database::conectar()
@@ -81,8 +84,6 @@ bool Database::guardarCliente(const QString &nombre, const QString &cuit)
 
     buscar.bindValue(":cuit", cuit);
 
-    buscar.addBindValue(cuit);
-
     qDebug() << "SQL:" << buscar.lastQuery();
     qDebug() << "Bound values:" << buscar.boundValues();
     qDebug() << "Cuit:" << cuit;
@@ -139,4 +140,25 @@ bool Database::guardarCliente(const QString &nombre, const QString &cuit)
     qDebug() << "Cliente creado correctamente";
 
     return true;
+}
+
+
+QList<QPair<QString, QString>> Database::obtenerClientes()
+{
+    QList<QPair<QString,QString>> listaClientes;
+
+    QSqlQuery query;
+    if (!query.exec("SELECT nombre, cuit FROM clientes")) { // Usa 'nombre', no 'cliente'
+        qDebug() << "❌ Error SQL al obtener clientes:" << query.lastError().text();
+        return listaClientes;
+    }
+
+    while (query.next()) {
+        QString cliente = query.value(0).toString();
+        QString cuit = query.value(1).toString();
+        listaClientes.append(qMakePair(cliente, cuit));
+    }
+
+    qDebug() << "✅ Clientes cargados desde la BD:" << listaClientes.size();
+    return listaClientes;
 }

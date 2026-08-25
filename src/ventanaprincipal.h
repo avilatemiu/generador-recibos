@@ -8,7 +8,9 @@
 #include <QDoubleSpinBox>
 #include <QPushButton>
 #include <QSettings>
+#include <QTableWidget>
 #include "database.h"
+
 
 class VentanaPrincipal : public QWidget
 {
@@ -49,6 +51,8 @@ private:
 
     //Ver Informe
     QWidget *informePage;
+    QTableWidget *tablaClientes;
+    void cargarClientesEnTabla();
 
     Database database;
     QSettings settings;

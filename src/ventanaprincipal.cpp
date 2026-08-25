@@ -8,6 +8,8 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QDate>
+#include <QTableWidget>
+#include <QHeaderView>
 
 VentanaPrincipal::VentanaPrincipal(QWidget *parent)
     : QWidget(parent),
@@ -31,6 +33,7 @@ VentanaPrincipal::VentanaPrincipal(QWidget *parent)
 
     connect(registroPagosButton,&QPushButton::clicked, this, [this](){
         stackedWidget->setCurrentIndex(2);
+        cargarClientesEnTabla();
     });
 
 }
@@ -41,7 +44,9 @@ void VentanaPrincipal::setupUi()
 
     stackedWidget = new QStackedWidget(this);
 
-    //Barra de tareas
+    //***************//
+    //Barra de tareas//
+    //***************//
 
     QHBoxLayout *topBarLayout = new QHBoxLayout();
 
@@ -50,8 +55,9 @@ void VentanaPrincipal::setupUi()
 
     topBarLayout->addWidget(configButton);
     topBarLayout->addStretch();
-
-    //Menu
+    //***************//
+    //-----Menu------//
+    //***************//
 
     menuPage = new QWidget();
     QVBoxLayout *menuLayout = new QVBoxLayout(menuPage);
@@ -68,7 +74,9 @@ void VentanaPrincipal::setupUi()
     menuLayout->addStretch();
     // menuPage->setLayout(menuLayout);
 
-    //Formulario
+    //***************//
+    //--Formulario---//
+    //***************//
 
     formularioPage = new QWidget();
 
@@ -100,7 +108,9 @@ void VentanaPrincipal::setupUi()
     formLayout->addRow(generarButton);
     formLayout->addRow(volverDesdeForm);
 
-    //Informe de Pagos
+    //***************//
+    //Informe de Pagos//
+    //***************//
 
     informePage = new QWidget();
     QVBoxLayout *informeLayout = new QVBoxLayout(informePage);
@@ -108,13 +118,19 @@ void VentanaPrincipal::setupUi()
     QPushButton *volverDesdeInforme = new QPushButton("Volver al menú", informePage);
     configurarBotonVolver(volverDesdeInforme);
 
-    informeLayout -> addStretch();
-    informeLayout -> addWidget(volverDesdeInforme);
-    informeLayout -> addStretch();
+    tablaClientes = new QTableWidget(informePage);
+    tablaClientes->setColumnCount(2);
+    tablaClientes->setHorizontalHeaderLabels({"Cliente", "CUIT"});
 
+    tablaClientes->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    tablaClientes->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    tablaClientes->setMinimumSize(400, 300);
 
-    // verPeriodo = new QPushButton("Ver períodos", this);
-    // verPeriodo -> move (100,100);
+    informeLayout -> addStretch();
+    informeLayout -> addWidget(tablaClientes,1);
+    informeLayout -> addStretch();
+    informeLayout -> addWidget(volverDesdeInforme,0);
+    informeLayout -> addStretch();
 
     //Páginas del stacked widget
 
@@ -205,4 +221,35 @@ void VentanaPrincipal::abrirConfiguracion()
     layout->addWidget(cerrarBtn);
 
     dialog.exec();
+}
+
+void VentanaPrincipal::cargarClientesEnTabla()
+{
+    if (!tablaClientes) {
+        qDebug() << "La tabla es nula";
+        return;
+    }
+
+    //Limpiar filas y columnas anteriores para evitar inconsistencias
+    tablaClientes->clearContents();
+    tablaClientes->setRowCount(0);
+
+    //Obtener lista
+    QList<QPair<QString, QString>> clientes = database.obtenerClientes();
+    qDebug() << "Cargando en la tabla" << clientes.size() << "clientes...";
+
+    //Insertar filas y crear items
+    for (int i = 0; i < clientes.size(); ++i) {
+        tablaClientes->insertRow(i);
+
+        // Crear cada celda explícitamente
+        QTableWidgetItem *itemNombre = new QTableWidgetItem(clientes[i].first);
+        QTableWidgetItem *itemCuit = new QTableWidgetItem(clientes[i].second);
+
+        tablaClientes->setItem(i, 0, itemNombre);
+        tablaClientes->setItem(i, 1, itemCuit);
+    }
+
+    //Forzar la actualización visual del widget
+    tablaClientes->viewport()->update();
 }

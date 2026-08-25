@@ -9,6 +9,7 @@ public:
     Database();
 
     bool guardarCliente(const QString &nombre, const QString &cuit);
+    QList<QPair<QString, QString>> obtenerClientes();
 
 private:
     bool conectar();
