@@ -42,7 +42,7 @@ bool PdfGenerator::generar(const Recibo &recibo, const QString &ruta)
 
     painter.drawText(1000, y, QString("En concepto de %1")
                                   .arg(recibo.getConcepto()));
-    y += 150;
+
 
 
     painter.end();

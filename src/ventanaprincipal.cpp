@@ -10,6 +10,8 @@
 #include <QDate>
 #include <QTableWidget>
 #include <QHeaderView>
+#include <QStandardPaths>
+#include <QDir>
 
 VentanaPrincipal::VentanaPrincipal(QWidget *parent)
     : QWidget(parent),
@@ -177,22 +179,14 @@ void VentanaPrincipal::onGenerarReciboClicked()
         return;
     }
 
-    QString ruta = QFileDialog::getSaveFileName(
-        this,
-        "Guardar recibo",
-        QString("recibo_%1.pdf").arg(recibo.getNumero(), 6, 10, QChar('0')),
-        "Archivos PDF (*.pdf)"
-        );
+    QString carpetaDocumentos = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+    QString carpetaDestino = carpetaDocumentos + "/MisRecibos";
+    QDir().mkpath(carpetaDestino);
 
-    if (ruta.isEmpty()) {
-        return;
-    }
+    QString nombreArchivo = QString("recibo_%1.pdf").arg(recibo.getNumero(), 6, 10, QChar('0'));
+    QString ruta = carpetaDestino + "/" + nombreArchivo;
 
-    if (!ruta.endsWith(".pdf", Qt::CaseInsensitive)) {
-        ruta += ".pdf";
-    }
-
-    if (!PdfGenerator::generar(recibo, ruta)) {
+    if (!PdfGenerator::generar(recibo,ruta)){
         QMessageBox::critical(this, "Error", "No se pudo generar el PDF.");
         return;
     }
