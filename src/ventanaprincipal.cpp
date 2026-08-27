@@ -116,23 +116,33 @@ void VentanaPrincipal::setupUi()
 
     informePage = new QWidget();
     QVBoxLayout *informeLayout = new QVBoxLayout(informePage);
+    QHBoxLayout *tablasLayout = new QHBoxLayout();
 
-    QPushButton *volverDesdeInforme = new QPushButton("Volver al menú", informePage);
-    configurarBotonVolver(volverDesdeInforme);
+
+
 
     tablaClientes = new QTableWidget(informePage);
     tablaClientes->setColumnCount(2);
     tablaClientes->setHorizontalHeaderLabels({"Cliente", "CUIT"});
 
+
     tablaClientes->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     tablaClientes->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    tablaClientes->setMinimumSize(400, 300);
+    tablaClientes->setSelectionBehavior(QAbstractItemView::SelectRows);
 
-    informeLayout -> addStretch();
-    informeLayout -> addWidget(tablaClientes,1);
-    informeLayout -> addStretch();
-    informeLayout -> addWidget(volverDesdeInforme,0);
-    informeLayout -> addStretch();
+    tablaMeses = new QTableWidget(informePage);
+    inicializarTablaMeses();
+
+    tablasLayout->addWidget(tablaClientes, 1);
+    tablasLayout->addWidget(tablaMeses, 1);
+
+    QPushButton *volverDesdeInforme = new QPushButton("Volver al menú", informePage);
+    configurarBotonVolver(volverDesdeInforme);
+
+    informeLayout->addLayout(tablasLayout, 1);
+    informeLayout->addWidget(volverDesdeInforme, 0);
+
+    connect(tablaClientes, &QTableWidget::cellClicked, this, &VentanaPrincipal::cargarMesesDelCliente);
 
     //Páginas del stacked widget
 
@@ -246,4 +256,46 @@ void VentanaPrincipal::cargarClientesEnTabla()
 
     //Forzar la actualización visual del widget
     tablaClientes->viewport()->update();
+}
+
+void VentanaPrincipal::inicializarTablaMeses()
+{
+    tablaMeses->setColumnCount(2);
+    tablaMeses->setHorizontalHeaderLabels({"Mes", "Estado"});
+    tablaMeses->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    tablaMeses->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+    // Lista de meses
+    QStringList meses = {"Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+                         "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"};
+
+    tablaMeses->setRowCount(12);
+    for (int i = 0; i < 12; ++i) {
+        tablaMeses->setItem(i, 0, new QTableWidgetItem(meses[i]));
+        tablaMeses->setItem(i, 1, new QTableWidgetItem("-")); // Estado por defecto
+    }
+}
+
+void VentanaPrincipal::cargarMesesDelCliente(int row, int column)
+{
+    Q_UNUSED(column);
+
+    // Obtener el CUIT del cliente seleccionado en la columna 1
+    QTableWidgetItem *cuitItem = tablaClientes->item(row, 1);
+    if (!cuitItem) return;
+
+    QString cuit = cuitItem->text();
+    QString nombreCliente = tablaClientes->item(row, 0)->text();
+
+    // Aquí consultarías a tu base de datos los pagos de este CUIT
+    // Por ejemplo: QList<int> mesesPagados = database.obtenerMesesPagados(cuit);
+
+    // Ejemplo visual de cómo actualizar la tabla de meses:
+    for (int i = 0; i < 12; ++i) {
+        // Marcás como pagado o pendiente según los datos del cliente
+        QTableWidgetItem *estadoItem = new QTableWidgetItem("Pendiente");
+        estadoItem->setForeground(Qt::red);
+
+        tablaMeses->setItem(i, 1, estadoItem);
+    }
 }

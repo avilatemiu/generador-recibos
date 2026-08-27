@@ -22,6 +22,7 @@ public:
 private slots:
     void onGenerarReciboClicked();
     void configurarBotonVolver(QPushButton *boton);
+    void cargarMesesDelCliente(int row, int column);
 
 private:
 
@@ -44,7 +45,7 @@ private:
     QDoubleSpinBox *importeEdit;
     QPushButton *generarButton;
 
-    //Configutación
+    //Configuración
     QPushButton *configButton;
 
     void abrirConfiguracion();
@@ -52,7 +53,11 @@ private:
     //Ver Informe
     QWidget *informePage;
     QTableWidget *tablaClientes;
+    QTableWidget *tablaMeses;
     void cargarClientesEnTabla();
+    void inicializarTablaMeses();
+
+
 
     Database database;
     QSettings settings;
