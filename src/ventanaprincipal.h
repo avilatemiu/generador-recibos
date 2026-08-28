@@ -22,7 +22,7 @@ public:
 private slots:
     void onGenerarReciboClicked();
     void configurarBotonVolver(QPushButton *boton);
-    void cargarMesesDelCliente(int row, int column);
+    void cargarInformePagos();
 
 private:
 
@@ -52,10 +52,8 @@ private:
 
     //Ver Informe
     QWidget *informePage;
-    QTableWidget *tablaClientes;
-    QTableWidget *tablaMeses;
-    void cargarClientesEnTabla();
-    void inicializarTablaMeses();
+
+    QTableWidget *tablaInformes;
 
 
 
