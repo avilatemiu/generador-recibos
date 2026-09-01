@@ -187,6 +187,8 @@ void VentanaPrincipal::onGenerarReciboClicked()
         return;
     }
 
+    database.registrarPago(recibo.getCuit(), recibo.getFecha().month(), recibo.getFecha().year());
+
     QString carpetaDocumentos = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
     QString carpetaDestino = carpetaDocumentos + "/MisRecibos";
     QDir().mkpath(carpetaDestino);
@@ -233,21 +235,43 @@ void VentanaPrincipal::cargarInformePagos()
     tablaInformes->setRowCount(0);
 
     QList<QPair<QString, QString>> clientes = database.obtenerClientes();
+    int anioActual = QDate::currentDate().year();
 
     for (int i = 0; i < clientes.size(); ++i) {
         tablaInformes->insertRow(i);
 
+        QString cliente = clientes[i].first;
+        QString cuit = clientes[i].second;
+
         // Columna 0: Cliente
-        tablaInformes->setItem(i, 0, new QTableWidgetItem(clientes[i].first));
+        tablaInformes->setItem(i, 0, new QTableWidgetItem(cliente));
 
         // Columna 1: CUIT
-        tablaInformes->setItem(i, 1, new QTableWidgetItem(clientes[i].second));
+        tablaInformes->setItem(i, 1, new QTableWidgetItem(cuit));
 
-        // Columnas 2 a 13: Estado de cada mes
-        for (int mes = 2; mes < 14; ++mes) {
-            QTableWidgetItem *itemMes = new QTableWidgetItem("-"); // Estado por defecto
+        // 1. Obtener la lista de meses pagados (1 al 12) desde la base de datos para este CUIT y Año
+        QList<int> mesesPagados = database.obtenerMesesPagados(cuit, anioActual);
+
+        // Columnas 2 a 13 equivalen a los meses 1 a 12 (Enero = columna 2, Febrero = columna 3, etc.)
+        for (int mes = 1; mes <= 12; ++mes) {
+            int columna = mes + 1; // Mapeo: mes 1 -> col 2, mes 12 -> col 13
+
+            // 2. Verificar si el mes está pagado
+            bool estaPagado = mesesPagados.contains(mes);
+            QString texto = estaPagado ? "X" : "-";
+
+            QTableWidgetItem *itemMes = new QTableWidgetItem(texto);
             itemMes->setTextAlignment(Qt::AlignCenter);
-            tablaInformes->setItem(i, mes, itemMes);
+
+            // 3. Destacar la "X" visualmente
+            if (estaPagado) {
+                itemMes->setForeground(Qt::darkGreen);
+                QFont font = itemMes->font();
+                font.setBold(true);
+                itemMes->setFont(font);
+            }
+
+            tablaInformes->setItem(i, columna, itemMes);
         }
     }
 }

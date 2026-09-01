@@ -63,6 +63,22 @@ bool Database::crearTablas()
         return false;
     }
 
+    query.prepare(
+        "CREATE TABLE IF NOT EXISTS pagos ("
+        "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+        "cuit TEXT NOT NULL, "
+        "mes INTEGER NOT NULL, "
+        "anio INTEGER NOT NULL, "
+        "UNIQUE(cuit, mes, anio)"
+        ")"
+        );
+
+    if (!query.exec()){
+        qDebug() << "Error al crear tabla pagos:"
+                 << query.lastError().text();
+        return false;
+    }
+
     return true;
 }
 
@@ -142,6 +158,36 @@ bool Database::guardarCliente(const QString &nombre, const QString &cuit)
     return true;
 }
 
+bool Database::registrarPago(const QString &cuit, int mes, int anio)
+{
+    QSqlQuery query;
+    query.prepare(
+        "INSERT OR REPLACE INTO pagos (cuit, mes, anio)"
+        "VALUES (:cuit, :mes, :anio)"
+        );
+    query.bindValue(":cuit", cuit);
+    query.bindValue(":mes", mes);
+    query.bindValue(":anio", anio);
+
+    return query.exec();
+}
+
+QList<int> Database::obtenerMesesPagados(const QString &cuit, int anio)
+{
+    QList<int> meses;
+    QSqlQuery query;
+    query.prepare("SELECT mes FROM pagos WHERE cuit = :cuit AND anio = :anio");
+    query.bindValue(":cuit", cuit);
+    query.bindValue(":anio", anio);
+
+    if (query.exec()) {
+        while (query.next()){
+            meses.append(query.value(0).toInt());
+        }
+    }
+
+    return meses;
+}
 
 QList<QPair<QString, QString>> Database::obtenerClientes()
 {
